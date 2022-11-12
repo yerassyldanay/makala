@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  makala-api:
+    image: golang:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8600:8080
+    networks:
+      - makala_makala_network
+    command: ["./app"]
+
+networks:
+  makala_makala_network:
+    external: true

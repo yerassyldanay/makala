@@ -1,0 +1,131 @@
+basePath: /api/verification
+definitions:
+  model.ErrMsg:
+    properties:
+      err:
+        type: string
+    type: object
+  model.GetFeedResponse:
+    properties:
+      posts:
+        items:
+          $ref: '#/definitions/poststore.FeedPost'
+        type: array
+      started_fetching_at_unix_nano_utc:
+        type: integer
+      version:
+        type: string
+    type: object
+  model.PostRequest:
+    properties:
+      author:
+        example: t2_11qnzrqv
+        type: string
+      content:
+        type: string
+      link:
+        type: string
+      nsfw:
+        type: boolean
+      promoted:
+        type: boolean
+      score:
+        type: number
+      submakala:
+        type: string
+      title:
+        type: string
+    required:
+    - author
+    type: object
+  poststore.FeedPost:
+    properties:
+      author:
+        type: string
+      content:
+        type: string
+      id:
+        type: integer
+      link:
+        type: string
+      nsfw:
+        type: boolean
+      promoted:
+        type: boolean
+      score:
+        type: number
+      submakala:
+        type: string
+      title:
+        type: string
+    type: object
+info:
+  contact:
+    name: Yerassyl Danay
+  description: service stores & provides feed for users
+  title: makala Feed Service
+  version: 1.0.0
+paths:
+  /api/makala/v1/feed:
+    get:
+      consumes:
+      - application/json
+      description: this API lets a user fetch feed
+      parameters:
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: number of elements
+        in: query
+        name: count
+        type: integer
+      - description: author name for ad index caching
+        in: query
+        name: author
+        type: string
+      - description: time, when a user started fetching feed
+        in: query
+        name: started_fetching_at_unix_nano_utc
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.GetFeedResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrMsg'
+      summary: fetches feed
+      tags:
+      - feed
+  /api/makala/v1/post:
+    post:
+      consumes:
+      - application/json
+      description: creates a post
+      parameters:
+      - description: post info
+        in: body
+        name: args
+        required: true
+        schema:
+          $ref: '#/definitions/model.PostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/poststore.FeedPost'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrMsg'
+      summary: creates a post
+      tags:
+      - post
+swagger: "2.0"

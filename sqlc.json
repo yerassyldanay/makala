@@ -1,0 +1,64 @@
+{
+  "version": "1",
+  "packages": [
+    {
+      "name": "poststore",
+      "path": "./provider/poststore",
+      "engine": "postgresql",
+      "schema": "./datastore/postgres_store/migration",
+      "queries": "./datastore/postgres_store/queries/posts.sql",
+      "emit_json_tags": true,
+      "emit_prepared_queries": true,
+      "emit_interface": true,
+      "emit_exact_table_names": false,
+      "emit_empty_slices": false,
+      "json_tags_case_style": "snake",
+      "output_db_file_name": "db.go",
+      "output_models_file_name": "models.go",
+      "output_querier_file_name": "querier.go"
+    }
+  ],
+  "overrides": [
+    {
+      "go_type": {
+        "import": "time",
+        "type": "Time",
+        "pointer": true
+      },
+      "db_type": "timestamptz",
+      "nullable": true
+    },
+    {
+      "go_type": {
+        "type": "string",
+        "pointer": true
+      },
+      "db_type": "pg_catalog.varchar",
+      "nullable": true
+    },
+    {
+      "go_type": {
+        "type": "int64",
+        "pointer": true
+      },
+      "db_type": "pg_catalog.int8",
+      "nullable": true
+    },
+    {
+      "go_type": {
+        "type": "bool",
+        "pointer": true
+      },
+      "db_type": "bool",
+      "nullable": true
+    },
+    {
+      "go_type": {
+        "type": "float64",
+        "pointer": true
+      },
+      "db_type": "float8",
+      "nullable": true
+    }
+  ]
+}
