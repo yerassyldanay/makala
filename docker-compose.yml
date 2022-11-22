@@ -1,6 +1,7 @@
 version: "3.8"
 services:
   makala-api:
+    container_name: makala_api
     image: golang:latest
     build:
       context: .

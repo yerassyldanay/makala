@@ -1,7 +1,9 @@
-POSTGRESQL_HOST = 0.0.0.0
-POSTGRESQL_PORT = 8603
-REDIS_HOST = 0.0.0.0
-REDIS_PORT = 8601
+POSTGRESQL_HOST=0.0.0.0
+POSTGRESQL_PORT=8603
+REDIS_HOST=0.0.0.0
+REDIS_PORT=8601
+APP_NAME=app
+DOCKER_CONTAINER_NAME=makala_api
 
 .PHONY: generate
 generate:
@@ -58,3 +60,15 @@ integration_test: env_echo_main
 env_echo_main:
 	@echo "[ENV] setting env variables..."
 	@echo POSTGRESQL_HOST=$(POSTGRESQL_HOST) POSTGRESQL_PORT=$(POSTGRESQL_PORT) REDIS_HOST=$(REDIS_HOST) REDIS_PORT=$(REDIS_PORT)
+
+.PHONY: clean
+clean:
+	rm -rf ${APP_NAME}
+
+.PHONY: run
+run:
+	go build -o ${APP_NAME} ./cmd/server && POSTGRESQL_HOST=${POSTGRESQL_HOST} POSTGRESQL_PORT=${POSTGRESQL_PORT} REDIS_HOST=${REDIS_HOST} REDIS_PORT=${REDIS_PORT} ./app
+
+.PHONY: logs
+logs:
+	docker logs -f ${DOCKER_CONTAINER_NAME}

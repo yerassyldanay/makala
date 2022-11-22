@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
+
 	"github.com/yerassyldanay/makala/server/rest/middleware"
 	"github.com/yerassyldanay/makala/service/postfeed"
 )
@@ -41,5 +43,6 @@ func (s *PostServer) SetRouter(opts ...RouterOption) {
 		v1.POST("/post", s.CreatePost)
 	}
 
+	pprof.Register(router)
 	s.Router = router
 }

@@ -2,9 +2,13 @@ package adstore
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/yerassyldanay/makala/datastore/redis_store"
@@ -84,4 +88,80 @@ func TestAdStore(t *testing.T) {
 		require.NoErrorf(t, err, "failed to fetch ads")
 		require.Equalf(t, ids, []int64{}, "expected not to get any ad")
 	}
+}
+
+const maxRequests = 10
+const maxSuccess = 4
+
+func makeRequest(ctx context.Context, urlString string, successChan chan struct{}) {
+	if len(successChan) == cap(successChan) {
+		fmt.Println("we have enough number of successful requests...")
+		return
+	}
+
+	cl := http.DefaultClient
+	resp, err := cl.Get(urlString)
+	if err != nil || resp.StatusCode != 200 {
+		fmt.Printf("%q - not ok (%d). err: %v \n", urlString, resp.StatusCode, err)
+		return
+	}
+	defer resp.Body.Close()
+	fmt.Printf("%q - ok (%d) \n", urlString, resp.StatusCode)
+	successChan <- struct{}{}
+}
+
+func handleUrls(ch <-chan string) {
+	var wg = &sync.WaitGroup{}
+	var limitCh = make(chan struct{}, maxRequests)
+
+	var successChan = make(chan struct{}, maxSuccess)
+
+	for urlString := range ch {
+
+		limitCh <- struct{}{}
+
+		wg.Add(1)
+		go func(urlString string, wg *sync.WaitGroup) {
+			defer wg.Done()
+			makeRequest(context.Background(), urlString, successChan)
+			<-limitCh
+		}(urlString, wg)
+	}
+}
+
+func TestUnicode(t *testing.T) {
+	urls := make([]string, 0, 100)
+	for i := 0; i < 50; i++ {
+		urls = append(urls, []string{
+			"https://google.com",
+			"http://google.com",
+		}...)
+	}
+
+	var urlChan = make(chan string)
+	go func() {
+		for _, urlString := range urls {
+			urlChan <- urlString
+		}
+		close(urlChan)
+	}()
+
+	handleUrls(urlChan)
+}
+
+func TestGoroutine(t *testing.T) {
+	ctx, can := context.WithCancel(context.Background())
+	for i := 0; i < 100; i++ {
+		go func(ctx context.Context, i int) {
+			select {
+			case <-ctx.Done():
+			default:
+				time.Sleep(time.Second * 1)
+				fmt.Printf("finished the goroutine %d \n", i)
+			}
+		}(ctx, i)
+	}
+
+	time.Sleep(time.Second * 1)
+	can()
 }
